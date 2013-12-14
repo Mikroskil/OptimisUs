@@ -47,9 +47,9 @@
 <body>
 	<header class="page-encaps">
 		<div id="kapsul-navigasi">
-			<nav>
+			<!--<nav>
 				<ul><li><a href="index.php">Beranda</a></li><li><a href="pages/rilis.php">Terbaru</a></li><li><a href="guide.php">Panduan</a></li><li><a href="tos.php">Aturan Berlaku</a></li></ul>
-			</nav>
+			</nav>-->
 		</div>
 		<div id="kapsul-judul"><h1>Aplikasi Pencari <span style="color:rgba(65, 124, 167, 0.92);">KORUPSI</span> Medan</h1></div><span id="desc">(KOST RUMAH PENGINAPAN SEKITAR)</span>
 	</header><br class="clearFloating">
@@ -142,7 +142,7 @@
 			<div class="foms-user" id="logUser">
 				<span>LOGIN</span>
 				<form action="" name="loginPv" method="POST" onSubmit="logProses(this); return false;">
-					<label for="usernamePv">Username :</label><br>
+					<label for="usernamePv">Login dengan E-mail :</label><br>
 					<input name="usernamePv" id="usernamePv" type="text" required /><br>
 					<label for="passPv">Password : </label><br>
 					<input type="password" id="passPv" name="passPv" required /><br>
