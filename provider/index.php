@@ -29,80 +29,113 @@ if(isset($_SESSION['provider']))
 <!doctype html>
 <html>
 <head>
-	<title></title>
+	<title>Provider - <?php echo $fName . ' ' . $lName; ?></title>
     <style type="text/css">
 	body{background-color: rgba(222,222,222,0.938); width:100%; height:100%; margin:0; padding:0; position: relative; display: block;}
         #header-prov{background-color: #444; box-shadow: 0 1px 2px dimgray; color: rgba(255, 253, 253, 0.96); width:100%; height:35px; position:fixed; display:block; margin:0; padding:0; z-index:10;} header-prov h3, header-prov nav#prov{} #header-prov h3{color:rgba(250,250,254,0.96); position:relative; display: inline-block; width:40%; height:100%; margin:0; padding:0; margin-left:20px;} #header-prov nav#prov{width: 30%; height:100%; right: 60px; position:absolute; display:inline-block; text-align:right;} #header-prov #prov span{width:14%; top:10px; position:fixed; margin:0; padding:0; display:block; text-align:right;} #header-prov nav#prov ul#navProv{margin:0; padding:0; position:relative; display:block; width: 50%; text-align:left; top: 10px; left:198px;} nav#prov ul#navProv li#info{list-style:none; display: inline; margin:0;} ul#navProv li#info:hover{cursor: pointer;} #header-prov nav#prov a{color: #fff; text-decoration:none;} ul#ul-link{width:100%; height:100%; margin:0; padding:0; width:100%; margin-top: 6px; position: relative; display:block;} ul#ul-link li{list-style:none; position:relative; display:none; margin: 0; padding: 0; background-color: rgba(70,85,219,0.91);} /*wrap-body-provider*/ #wrap-body-provider{width: 81%; height: auto; margin: 0 auto; display: table; position: relative; padding: 6px;} /*info-provider session*/ #info-provider{width: 75.6%; height: auto; min-height: 100px; display: table-cell; position:relative;} /*end info-provider*/ /*profile-provider session*/ #profile-provider{width: 24%; min-height: 100px; /*background-color: rgba(102,153,204,0.914);*/ background-color: #fff; box-shadow: 0 0 2px papayawhip; display:table-cell;} /*end profile-provider*/ .caption-session{width: 100%; position: relative; background-color: darkseagreen; padding: 5px 0; display:block;} .caption-session h3{margin: 6px;} .row-table-info{background-color: #fff; margin:0; padding:0; position: relative; display: inline-block; width: 100%;} /*info listing*/ .ulist{margin:6px 0; padding: 10px 0; position: relative; width: 100%; display:block;} .ulist .listing-list{display: inline-block; height: 55px; list-style: none; margin: 8px; padding: 0; position: relative; width: 259px;} .listing-list ol.list-info{height: 100%; width: 100%; margin: 0; padding: 0;} .list-info > li{display: block; list-style: none;} /*end info lisitng*/ .info-side-profile{width: 50%; margin: 0 auto; position: relative; display: block; text-align:center; /*top:-60px;*/} .edit-info{color: rgba(233,233,233,0.915);} .edit-info:hover{color: rgba(73,73,73,0.837); cursor: pointer;}
-        #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
+        #map-canvas {width: 98% !important; height: 450px !important; display: block !important; position: relative !important; margin: 0 auto !important; padding: 0px; }
     </style>
     <link rel="stylesheet" href="../jskonf/jquery-1.8.3.min.js" type="text/javascript">
+    <link rel="stylesheet" href="../csskonf/prov.css" type="text/css" media="screen" />
     <script type="text/javascript" src="../jskonf/handle.package.js"></script>
     <script type="text/javascript" src="../jskonf/jquery-1.8.3.min.js"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&libraries=places"></script>
-    <!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&sensor=true"></script>-->
+    <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&libraries=places"></script> -->
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCzlHCCRv26lN0idv47Mh6-scMsT8wzyis&v=3&sensor=true&libraries=places"></script>
     <script>
 var map;
 var infowindow;
 
 function initialize() {
-  var pyrmont = new google.maps.LatLng(3.5833, 98.6667);
 
-  map = new google.maps.Map(document.getElementById('map-canvas'), {
-    center: pyrmont,
-    zoom: 15
+  var markers = [];
+  var map = new google.maps.Map(document.getElementById('map-canvas'), {
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    zoom: 15,
+	mapTypeControl:true,
+  	mapTypeControlOptions: {
+	  style:google.maps.MapTypeControlStyle.DROPDOWN_MENU
+    },
   });
 
-  var request = {
-    location: pyrmont,
-    radius: 500,
-    types: ['store']
-  };
-  infowindow = new google.maps.InfoWindow();
-  var service = new google.maps.places.PlacesService(map);
-  service.nearbySearch(request, callback);
-}
+  var defaultBounds = new google.maps.LatLngBounds(
+      //new google.maps.LatLng(-33.8902, 151.1759),
+      new google.maps.LatLng(3.5833, 98.6667));
+  map.fitBounds(defaultBounds);
 
-function callback(results, status) {
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i = 0; i < results.length; i++) {
-      createMarker(results[i]);
+  // Create the search box and link it to the UI element.
+  var input = /** @type {HTMLInputElement} */(
+      document.getElementById('pac-input'));
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+  var searchBox = new google.maps.places.SearchBox(
+    /** @type {HTMLInputElement} */(input));
+
+  // [START region_getplaces]
+  // Listen for the event fired when the user selects an item from the
+  // pick list. Retrieve the matching places for that item.
+  google.maps.event.addListener(searchBox, 'places_changed', function() {
+    var places = searchBox.getPlaces();
+
+    for (var i = 0, marker; marker = markers[i]; i++) {
+      marker.setMap(null);
     }
-  }
-}
 
-function createMarker(place) {
-  var placeLoc = place.geometry.location;
-  var marker = new google.maps.Marker({
-    map: map,
-    position: place.geometry.location
+    // For each place, get the icon, place name, and location.
+    markers = [];
+    var bounds = new google.maps.LatLngBounds();
+    for (var i = 0, place; place = places[i]; i++) {
+      var image = {
+        url: place.icon,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25)
+      };
+
+      // Create a marker for each place.
+      var marker = new google.maps.Marker({
+        map: map,
+        icon: image,
+        title: place.name,
+        position: place.geometry.location
+      });
+
+      markers.push(marker);
+
+      bounds.extend(place.geometry.location);
+    }
+
+    map.fitBounds(bounds);
+  });
+  // [END region_getplaces]
+
+  // Bias the SearchBox results towards places that are within the bounds of the
+  // current map's viewport.
+  google.maps.event.addListener(map, 'bounds_changed', function() {
+    var bounds = map.getBounds();
+    searchBox.setBounds(bounds);
   });
 
-  google.maps.event.addListener(marker, 'click', function() {
-    infowindow.setContent(place.name);
-    infowindow.open(map, this);
-  });
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
+
     </script>
     <script type="text/javascript">
-		$(document).ready(function(e) {
-			var x = false;
-			$("#info").click(function(e) {
-				if(x == false) {
-					$("#ul-link li").slideDown(300);
-					x = true;
-				} else {
-					$("#ul-link li").slideUp(300);
-					x = false;
-				}
-			});
-		});
+        $(document).ready(function (e) {
+            var x = false;
+            $("#info").click(function (e) {
+                if (x == false) {
+                    $("#ul-link li").slideDown(300);
+                    x = true;
+                } else {
+                    $("#ul-link li").slideUp(300);
+                    x = false;
+                }
+            });
+        });
+        //window.onload = function () { var t = document.getElementsByTagName("title").item(0); p =  t.innerHTML = "Profile "; }
 	</script>
 </head>
 <body>
@@ -121,7 +154,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 		</nav>
     </div>
     </header><br style="clear: both;">
-    <div style="width:100%; margin:0; padding:15px 0; height:100%; position:relative; top: 35px;">
+    <div style="width:100%; display:block; margin:0; padding:15px 0; height:100%; position:relative; top: 35px;">
         <div id="wrap-body-provider">
         <aside id="profile-provider">
         	<div style="height: auto; padding:0; margin:10px auto !important; position:relative;"><img src="../img/profile_avatar.png" alt="profile" width="110" height="110" style="position: relative; border-radius: 50%; display:block; margin:0 auto;" /></div>
@@ -190,8 +223,11 @@ google.maps.event.addDomListener(window, 'load', initialize);
         </article>
         </div>
     </div>
-    <div id="map-canvas" style="width: 50%; "></div>
-    <div style="width:46%; float:left"></div>
+    <section id="mapping-sess">
+        <section id="filtering"><form name="collection" action="" method="GET">Pencarian Lokasi <input type="search" class="controls" id="pac-input" placeholder="Ketikkan alamat lokasi" required /></form></section>
+        <div id="map-canvas" style="margin: 10px 0;"></div>
+        <div style="width:46%; position:relative; display: block; margin:8px 0;"></div>
+    </section>
 </body>
 </html>
 <?php
