@@ -34,10 +34,11 @@ if(isset($_SESSION['provider']))
 	body{background-color: rgba(222,222,222,0.938); width:100%; height:100%; margin:0; padding:0; position: relative; display: block;}
         #header-prov{background-color: #444; box-shadow: 0 1px 2px dimgray; color: rgba(255, 253, 253, 0.96); width:100%; height:35px; position:fixed; display:block; margin:0; padding:0; z-index:10;} header-prov h3, header-prov nav#prov{} #header-prov h3{color:rgba(250,250,254,0.93); position:relative; display: inline-block; width:40%; height:100%; margin:0; padding:0; margin-left:20px; top:6px;} #header-prov nav#prov{width: 30%; height:100%; right: 40px; position:absolute; display:inline-block; text-align:right; font-size: 16px; color:rgba(91%, 91%, 91%, 0.895483);} #header-prov #prov span{width:14%; top:10px; position:fixed; margin:0; padding:0; display:block; text-align:right;} #header-prov nav#prov ul#navProv{margin:0; padding:0; position:relative; display:block; width: 50%; text-align:left; top: 10px; left:198px;} nav#prov ul#navProv li#info{list-style:none; display: inline; margin:0;} ul#navProv li#info:hover{cursor: pointer;} #header-prov nav#prov a{color: #fff; text-decoration:none;} ul#ul-link{width:100%; height:100%; margin:0; padding:0; width:100%; margin-top: 6px; position: relative; display:block;} ul#ul-link li{list-style:none; position:relative; display:none; margin: 0; padding: 0; background-color: rgba(70,85,219,0.91);} /*wrap-body-provider*/ #wrap-body-provider{width: 81%; height: auto; margin: 0 auto; display: table; position: relative; padding: 6px;} /*info-provider session*/ #info-provider{width: 75.6%; height: auto; min-height: 100px; display: table-cell; position:relative;} /*end info-provider*/ /*profile-provider session*/ #profile-provider{width: 24%; min-height: 100px; /*background-color: rgba(102,153,204,0.914);*/ background-color: #fff; box-shadow: 0 0 2px papayawhip; display:table-cell;} /*end profile-provider*/ .caption-session{width: 100%; position: relative; background-color: darkseagreen; padding: 5px 0; display:block;} .caption-session h3{margin: 6px;} .row-table-info{background-color: #fff; margin:0; padding:0; position: relative; display: inline-block; width: 100%;} /*info listing*/ .ulist{margin:6px 0; padding: 10px 0; position: relative; width: 100%; display:block;} .ulist .listing-list{display: inline-block; height: 55px; list-style: none; margin: 8px; padding: 0; position: relative; width: 259px;} .listing-list ol.list-info{height: 100%; width: 100%; margin: 0; padding: 0;} .list-info > li{display: block; list-style: none;} /*end info lisitng*/ .info-side-profile{width: 50%; margin: 0 auto; position: relative; display: block; text-align:center; /*top:-60px;*/} .edit-info{color: rgba(233,233,233,0.915);} .edit-info:hover{color: rgba(73,73,73,0.837); cursor: pointer;}
         #map-canvas {width: 98% !important; height: 450px !important; display: block !important; position: relative !important; margin: 0 auto !important; padding: 0px; }
-		#hidden-editor-map{width: 62%; height: 360px; background-color: rgba(255, 255, 255, 0.927); color: rgba(10%, 10%, 10%, 0.935); position:absolute; display:none; box-shadow:0 0 4px rgba(36%, 36%, 36%, 0.84917); top:45%; left:20%; z-index:5;}
+		#hidden-editor-map{width: 64%; min-height: 420px; max-height: auto; background-color: rgba(255, 255, 255, 0.927); color: rgba(10%, 10%, 10%, 0.935); position:absolute; display:none; box-shadow:0 0 4px rgba(36%, 36%, 36%, 0.84917); top:22%; left:20%; z-index:5;}
     </style>
     <link rel="stylesheet" href="../jskonf/jquery-1.8.3.min.js" type="text/javascript">
     <link rel="stylesheet" href="../csskonf/prov.css" type="text/css" media="screen" />
+    <script src="../ckeditor/ckeditor.js"></script>
     <script type="text/javascript" src="../jskonf/handle.package.js"></script>
     <script type="text/javascript" src="../jskonf/jquery-1.8.3.min.js"></script>
     <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&libraries=places"></script> -->
@@ -59,7 +60,28 @@ function initialize() {
     },
   }
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  var latlngs = new Array();
+  var markers = new Array();
+  var count = 0;
+  <?php
+  $query = "SELECT * FROM placesinfo WHERE prov_info = '$mail'";
+  $querySend = mysqli_query($mysqli, $query);
   
+  while( $qFetching = mysqli_fetch_assoc($querySend) ) :
+  ?>
+  /*latlngs[count] = new google..maps.LatLng(<?php echo $qFetching['lat'] ?>, <?php echo $qFetching['lng'] ?>);
+  markers[count] = new google.maps.Marker({
+  position: latlngs[count],
+  title:'Click to zoom'
+  });
+  count += 1;*/
+  <?php
+  endwhile;
+  ?>
+  /*var infowindow = new google.maps.InfoWindow({
+    content: 'Latitude: ' + location.lat() + '<br>Longitude: ' + location.lng()
+  });
+  infowindow.open(map,marker);*/
   google.maps.event.addListener(map, 'click', function(event) {
 	  if(addition == 0) {
 		placeMarker(event.latLng);
@@ -133,9 +155,7 @@ function addKoor(lat, lng) {
 			$(d).parent().fadeOut(350);
 			$("#allof").css('opacity', 1);
 		}
-		function getVal(val) {
-			alert(val);
-		}
+		
 		
         //window.onload = function () { var t = document.getElementsByTagName("title").item(0); p =  t.innerHTML = "Profile "; }
 	</script>
@@ -233,19 +253,25 @@ function addKoor(lat, lng) {
     </section>
     </div>
     <div id="hidden-editor-map"><span onClick="javascript:openEditor(this.id);" id="closer" class="closeUp">Tutup</span>
-    <form name="infoTempat" id="infoTempat">
+    <form id="infoTempat" method="post" onSubmit="f(this); return false;">
     <fieldset><legend>Lengkapi Informasi Penyediaan tempat Anda : </legend>
-        <label for="alamat-lengkap">Alamat Lengkap : </label><input type="text" id="alamat-lengkap" name="alamat-lengkap" placeholder="Ketikkan alamat lengkap" onKeyUp="javascript:getVal(this.value);" required /><label for="kategori">Pilih Kategori : </label>
+        <label for="alamatLengkap">Alamat Lengkap : </label><input type="text" id="alamatLengkap" name="alamatLengkap" placeholder="Ketikkan alamat lengkap" required /><label for="kategori">Pilih Kategori : </label>
         <select name="kategori" id="kategori">
             <option value=""> -- Pilihan -- </option>
             <option value="hotel"> Hotel </option>
             <option value="kontrakan"> Kontrakan </option>
             <option value="kost"> Kost </option>
         </select>
+        <input type="hidden" id="hidden-prov" value="<?php echo $mail; ?>" />
         <label for="koordinat1">Koordinat Awal : </label><input type="text" id="koordinat1" name="koordinate1" readonly /> <label for="koordinat2">Koordinat Akhir : </label><input type="text" id="koordinat2" name="koordinat2" readonly />
+        
+        <label for="editor1">Deskripsi :</label>
+		<textarea name="editor1" id="editor1" class="editor1" required ></textarea>
+        <input type="submit" name="submit" id="submit" value="Simpan" /> <span id="infoLoader" style="display: inline-block; position:relative; z-index:5;"></span>
         </fieldset>
     </form>
     </div>
+    <script>CKEDITOR.replace('editor1');</script>
 </body>
 </html>
 <?php
